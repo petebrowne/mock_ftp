@@ -5,15 +5,13 @@ task :default => :spec
 #------------------------------------
 
 begin
-  require 'spec/rake/spectask'
+  require 'rspec/core'
+  require 'rspec/core/rake_task'
 rescue LoadError
-  raise 'Run `gem install rspec` to be able to run specs'
+  raise 'Run `gem install rspec --pre` to be able to run specs'
 else
-  desc 'Run specs'
-  Spec::Rake::SpecTask.new do |t|
-    t.spec_files = FileList['spec/*_spec.rb']
-    t.spec_opts  = %w(-fs --color)
-  end
+  desc 'Run the specs'
+  RSpec::Core::RakeTask.new
 end
 
 #------------------------------------

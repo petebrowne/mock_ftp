@@ -6,6 +6,10 @@ require 'bundler'
 Bundler.require(:default, :development)
 require 'mock_ftp'
 
-Spec::Runner.configure do |config|
-  
+RSpec.configure do |config|
+  config.include MockFTP
+end
+
+def open_ftp(&block)
+  ::Net::FTP.open('www.example.com', &block)
 end

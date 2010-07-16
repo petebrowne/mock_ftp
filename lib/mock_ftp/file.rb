@@ -3,7 +3,7 @@ module MockFTP
     attr_reader :path, :content
     
     def initialize(path, content = nil)
-      @path    = path.lchomp('/')
+      @path    = MockFTP::Folder.normalize_path(path)
       @content = content
       
       MockFTP::Folder.structure[@path] = self

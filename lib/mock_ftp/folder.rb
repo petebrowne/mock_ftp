@@ -11,14 +11,18 @@ module MockFTP
       end
       
       def find(path)
-        structure[path.lchomp('/')]
+        structure[normalize_path(path)]
+      end
+      
+      def normalize_path(path)
+        path.lchomp('/').chomp('/')
       end
     end
     
     attr_reader :path, :list
     
     def initialize(path)
-      @path = path.lchomp('/')
+      @path = MockFTP::Folder.normalize_path(path)
       @list = []
       
       MockFTP::Folder.structure[@path] = self

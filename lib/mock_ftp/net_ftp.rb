@@ -13,6 +13,11 @@ module MockFTP
       @closed       = false
     end
     
+    def abort
+      raise_if_closed
+      "226 Abort successful\n"
+    end
+    
     def chdir(path)
       raise_if_closed
       full_path = follow_path(path)
@@ -34,7 +39,7 @@ module MockFTP
     
     def login(username = 'anonymous', passwd = nil, acct = nil)
       raise_if_closed
-      "230 User #{username} logged in."
+      "230 User #{username} logged in.\n"
     end
     
     def nlst(path = '')

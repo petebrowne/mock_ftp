@@ -1,6 +1,29 @@
 require 'spec_helper'
 
 describe MockFTP do
+  describe '#abort' do
+    it 'should be successful' do
+      mock_ftp do |f|
+        open_ftp do |ftp|
+          ftp.abort.should == "226 Abort successful\n"
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.abort
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
+  
   describe '#chdir' do
     it 'should change the current working directory' do
       mock_ftp do |f|
@@ -10,7 +33,7 @@ describe MockFTP do
         end
         
         open_ftp do |ftp|
-          ftp.chdir('folder')
+          ftp.chdir 'folder'
           ftp.nlst.should == %w( file1 file2 )
         end
       end
@@ -25,8 +48,8 @@ describe MockFTP do
           end
           
           open_ftp do |ftp|
-            ftp.chdir('folder')
-            ftp.chdir('..')
+            ftp.chdir 'folder'
+            ftp.chdir '..'
             ftp.nlst.should == %w( folder )
           end
         end
@@ -38,8 +61,21 @@ describe MockFTP do
         mock_ftp do |f|
           open_ftp do |ftp|
             expect {
-              ftp.chdir('blah')
+              ftp.chdir 'blah'
             }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.chdir '..'
+            }.to raise_error(IOError, 'closed stream')
           end
         end
       end
@@ -66,17 +102,6 @@ describe MockFTP do
           end
         end
       end
-      
-      it 'should raise an IOError when attempting to connect' do
-        mock_ftp do |f|
-          open_ftp do |ftp|
-            ftp.close
-            expect {
-              ftp.nlst
-            }.to raise_error(IOError, 'closed stream')
-          end
-        end
-      end
     end
   end
   
@@ -84,7 +109,20 @@ describe MockFTP do
     it 'should return a successful login message' do
       mock_ftp do |f|
         open_ftp do |ftp|
-          ftp.login('username', 'password').strip.should == '230 User username logged in.'
+          ftp.login('username', 'password').should == "230 User username logged in.\n"
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.login 'username', 'password'
+            }.to raise_error(IOError, 'closed stream')
+          end
         end
       end
     end
@@ -122,8 +160,21 @@ describe MockFTP do
         mock_ftp do |f|
           open_ftp do |ftp|
             expect {
-              ftp.nlst('blah')
+              ftp.nlst 'blah'
             }.to raise_error(Net::FTPPermError, '550 Directory not found')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.nlst
+            }.to raise_error(IOError, 'closed stream')
           end
         end
       end

@@ -72,10 +72,14 @@ module MockFTP
     end
     alias_method :get_dir, :pwd
     
+    def quit
+      raise_if_closed
+    end
+    
     protected
     
-      def raise_if_closed
-        raise IOError.new('closed stream') if closed?
+      def find(path)
+        MockFTP::Folder.find(path)
       end
     
       def follow_path(path)
@@ -91,8 +95,8 @@ module MockFTP
         end
       end
     
-      def find(path)
-        MockFTP::Folder.find(path)
+      def raise_if_closed
+        raise IOError.new('closed stream') if closed?
       end
   end
 end

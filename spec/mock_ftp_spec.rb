@@ -190,4 +190,40 @@ describe MockFTP do
       end
     end
   end
+  
+  describe '#pwd' do
+    it 'should return the current path' do
+      mock_ftp do |f|
+        f.folder 'folder'
+        
+        open_ftp do |ftp|
+          ftp.chdir 'folder'
+          ftp.pwd.should == '/folder'
+        end
+      end
+    end
+    
+    context 'in the root directory' do
+      it "should return '/'" do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.pwd.should == '/'
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.pwd
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
 end

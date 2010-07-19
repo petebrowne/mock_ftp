@@ -58,6 +58,16 @@ module MockFTP
       end
     end
     
+    def pwd
+      raise_if_closed
+      if @current_path =~ /^\//
+        @current_path
+      else
+        "/#{@current_path}"
+      end
+    end
+    alias_method :get_dir, :pwd
+    
     protected
     
       def raise_if_closed

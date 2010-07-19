@@ -105,6 +105,16 @@ describe MockFTP do
     end
   end
   
+  describe '#connect' do
+    it 'should return nil' do
+      mock_ftp do |f|
+        open_ftp do |ftp|
+          ftp.connect('hostname', 100).should be_nil
+        end
+      end
+    end
+  end
+  
   describe '#login' do
     it 'should return a successful login message' do
       mock_ftp do |f|

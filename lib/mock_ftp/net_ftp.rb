@@ -37,6 +37,9 @@ module MockFTP
       !!@closed
     end
     
+    def connect(host, *args)
+    end
+    
     def login(username = 'anonymous', passwd = nil, acct = nil)
       raise_if_closed
       "230 User #{username} logged in.\n"

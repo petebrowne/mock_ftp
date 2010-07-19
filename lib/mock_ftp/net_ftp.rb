@@ -58,6 +58,10 @@ module MockFTP
       end
     end
     
+    def noop
+      raise_if_closed
+    end
+    
     def pwd
       raise_if_closed
       if @current_path =~ /^\//

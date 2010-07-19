@@ -191,6 +191,29 @@ describe MockFTP do
     end
   end
   
+  describe '#noop' do
+    it 'should return nil' do
+      mock_ftp do |f|
+        open_ftp do |ftp|
+          ftp.noop.should be_nil
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.noop
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
+  
   describe '#pwd' do
     it 'should return the current path' do
       mock_ftp do |f|

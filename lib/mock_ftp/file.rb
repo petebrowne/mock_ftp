@@ -1,10 +1,11 @@
 module MockFTP
   class File
-    attr_reader :path, :content
+    attr_reader :path, :content, :mtime
     
-    def initialize(path, content = nil)
+    def initialize(path, content = nil, mtime = Time.now)
       @path    = MockFTP::Folder.normalize_path(path)
       @content = content
+      @mtime   = mtime
       
       MockFTP::Folder.structure[@path] = self
     end

@@ -11,7 +11,7 @@ rescue LoadError
   raise 'Run `gem install rspec --pre` to be able to run specs'
 else
   desc 'Run the specs'
-  RSpec::Core::RakeTask.new
+  Rspec::Core::RakeTask.new
 end
 
 #------------------------------------

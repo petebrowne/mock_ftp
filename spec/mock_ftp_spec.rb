@@ -138,6 +138,94 @@ describe MockFTP do
     end
   end
   
+  describe '#mtime' do
+    it 'should return the modification time of the file' do
+      Timecop.freeze(Time.now) do
+        mock_ftp do |f|
+          f.file 'file'
+        
+          open_ftp do |ftp|
+            ftp.mtime('file').should eql(Time.now)
+          end
+        end
+      end
+    end
+    
+    it 'should return the time in UTC' do
+      mock_ftp do |f|
+        f.file 'file'
+        
+        open_ftp do |ftp|
+          ftp.mtime('file').should be_utc
+        end
+      end
+    end
+    
+    context 'when getting a local time' do
+      it 'should not be in UTC' do
+        mock_ftp do |f|
+          f.file 'file'
+        
+          open_ftp do |ftp|
+            ftp.mtime('file', true).should_not be_utc
+          end
+        end
+      end
+    end
+    
+    context 'with a set modification time' do
+      it 'should return that modification time' do
+        modified = Time.local(1999)
+        mock_ftp do |f|
+          f.file 'file', nil, modified
+        
+          open_ftp do |ftp|
+            ftp.mtime('file').should eql(modified)
+          end
+        end
+      end
+    end
+    
+    context 'on a folder' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          f.folder 'folder'
+        
+          open_ftp do |ftp|
+            expect {
+              ftp.mtime('folder')
+            }.to raise_error(Net::FTPPermError, '550 folder: not a plain file.')
+          end
+        end
+      end
+    end
+    
+    context 'without a file' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            expect {
+              ftp.mtime('blah')
+            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.mtime('blah')
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
+  
   describe '#nlst' do
     it 'should list mocked files' do
       mock_ftp do |f|

@@ -45,6 +45,21 @@ module MockFTP
       "230 User #{username} logged in.\n"
     end
     
+    def mtime(path, local = false)
+      raise_if_closed
+      full_path = follow_path(path)
+      
+      if file = find(full_path)
+        if file.respond_to?(:mtime)
+          local ? file.mtime : file.mtime.utc
+        else
+          raise ::Net::FTPPermError.new("550 #{path}: not a plain file.")
+        end
+      else
+        raise ::Net::FTPPermError.new("550 #{path}: No such file or directory")
+      end
+    end
+    
     def nlst(path = '')
       raise_if_closed
       full_path = follow_path(path)

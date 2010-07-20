@@ -138,9 +138,62 @@ describe MockFTP do
     end
   end
   
+  describe '#mdtm' do
+    it 'should return the modification time of the file' do
+      Timecop.freeze(Time.utc(2010, 7, 20, 15, 30, 30)) do
+        mock_ftp do |f|
+          f.file 'file'
+          
+          open_ftp do |ftp|
+            ftp.mdtm('file').should == '20100720153030'
+          end
+        end
+      end
+    end
+    
+    context 'on a folder' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          f.folder 'folder'
+        
+          open_ftp do |ftp|
+            expect {
+              ftp.mdtm('folder')
+            }.to raise_error(Net::FTPPermError, '550 folder: not a plain file.')
+          end
+        end
+      end
+    end
+    
+    context 'without a file' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            expect {
+              ftp.mdtm('blah')
+            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.mdtm('blah')
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
+  
   describe '#mtime' do
     it 'should return the modification time of the file' do
-      Timecop.freeze(Time.now) do
+      Timecop.freeze do
         mock_ftp do |f|
           f.file 'file'
         

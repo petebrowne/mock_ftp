@@ -45,6 +45,10 @@ module MockFTP
       "230 User #{username} logged in.\n"
     end
     
+    def mdtm(path)
+      mtime(path).strftime('%Y%m%d%H%M%S')
+    end
+    
     def mtime(path, local = false)
       raise_if_closed
       full_path = follow_path(path)

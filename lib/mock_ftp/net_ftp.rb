@@ -3,14 +3,25 @@ require 'pathname'
 module MockFTP
   class Net::FTP
     class << self
-      def open(*args)
-        yield self.new
+      def open(host, user = nil, passwd = nil, acct = nil)
+        if block_given?
+          ftp = new(host, user, passwd, acct)
+          begin
+            yield ftp
+          ensure
+            ftp.close
+          end
+        else
+          new(host, user, passwd, acct)
+        end
       end
     end
     
-    def initialize(*args)
+    def initialize(host = nil, user = nil, passwd = nil, acct = nil)
       @current_path = ''
       @closed       = false
+      @host         = host
+      @user         = user
     end
     
     def abort
@@ -37,12 +48,15 @@ module MockFTP
       !!@closed
     end
     
-    def connect(host, *args)
+    def connect(host, port = nil)
+      @host = host
+      nil
     end
     
-    def login(username = 'anonymous', passwd = nil, acct = nil)
+    def login(user = 'anonymous', passwd = nil, acct = nil)
       raise_if_closed
-      "230 User #{username} logged in.\n"
+      @user = user
+      "230 User #{user} logged in.\n"
     end
     
     def mdtm(path)

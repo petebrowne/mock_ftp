@@ -19,11 +19,12 @@ module MockFTP
       end
     end
     
-    attr_reader :path, :list
+    attr_reader :path, :list, :mtime
     
-    def initialize(path)
-      @path = MockFTP::Folder.normalize_path(path)
-      @list = []
+    def initialize(path, mtime = Time.now)
+      @path  = MockFTP::Folder.normalize_path(path)
+      @list  = []
+      @mtime = mtime
       
       MockFTP::Folder.structure[@path] = self
       

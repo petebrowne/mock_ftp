@@ -138,6 +138,73 @@ describe MockFTP do
     end
   end
   
+  describe '#list' do
+    it 'should return an array of ls -l style output' do
+      mock_ftp do |f|
+        f.folder 'folder', Time.utc(Time.now.year, 7, 4, 15)
+        f.file 'file1', '.' * 10000, Time.utc(2005, 12, 25)
+        f.file 'file2', '.' * 100000, Time.utc(Time.now.year, 1, 1, 1)
+        
+        open_ftp do |ftp|
+          ftp.list.should =~ [
+            'drwxr-xr-x   2 anonymous anonymous     4096 Jul  4 15:00 folder',
+            '-rw-r--r--   1 anonymous anonymous    10000 Dec 25  2005 file1',
+            '-rw-r--r--   1 anonymous anonymous   100000 Jan  1  1:00 file2'
+          ]
+        end
+      end
+    end
+    
+    it 'should correctly list the number of folders within a folder' do
+      mock_ftp do |f|
+        f.folder 'folder', Time.utc(2005, 12, 25) do |f|
+          10.times { |i| f.folder "folder#{i}" }
+        end
+        
+        open_ftp do |ftp|
+          ftp.list.should =~ [ 'drwxr-xr-x  12 anonymous anonymous     4096 Dec 25  2005 folder' ]
+        end
+      end
+    end
+    
+    context 'on a file' do
+      it 'list the details of that file' do
+        mock_ftp do |f|
+          f.file 'file', '', Time.utc(2005, 12, 25)
+          
+          open_ftp do |ftp|
+            ftp.list('file').should == [ '-rw-r--r--   1 anonymous anonymous        0 Dec 25  2005 file' ]
+          end
+        end
+      end
+    end
+    
+    context 'without a file' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            expect {
+              ftp.list('blah')
+            }.to raise_error(Net::FTPPermError, '450 blah: No such file or directory')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.list('blah')
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
+  
   describe '#mdtm' do
     it 'should return the modification time of the file' do
       Timecop.freeze(Time.utc(2010, 7, 20, 15, 30, 30)) do

@@ -14,6 +14,10 @@ module MockFTP
       ::File.basename(@path)
     end
     
+    def size
+      @content.to_s.size
+    end
+    
     def file?
       true
     end

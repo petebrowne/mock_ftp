@@ -21,7 +21,7 @@ module MockFTP
       @current_path = ''
       @closed       = false
       @host         = host
-      @user         = user
+      @user         = user || 'anonymous'
     end
     
     def abort
@@ -52,6 +52,25 @@ module MockFTP
       @host = host
       nil
     end
+    
+    def list(path = '')
+      raise_if_closed
+      full_path = follow_path(path)
+      
+      if file = find(full_path)
+        if file.folder?
+          file.list.collect do |f|
+            list_details_for(f)
+          end
+        else
+          [ list_details_for(file) ]
+        end
+      else
+        raise ::Net::FTPPermError.new("450 #{path}: No such file or directory")
+      end
+    end
+    alias_method :ls, :list
+    alias_method :dir, :list
     
     def login(user = 'anonymous', passwd = nil, acct = nil)
       raise_if_closed
@@ -142,9 +161,50 @@ module MockFTP
           @current_path / path
         end
       end
+      
+      def format_date(date)
+        formatted_date  = [ date.strftime('%b') ]
+        formatted_date << right_align_text(date.day.to_s, 2)
+        formatted_date << if date.year == Time.now.year
+          date.strftime('%H:%M').gsub(/^0/, ' ')
+        else
+          " #{date.year}"
+        end
+        formatted_date.join(' ')
+      end
+      
+      def list_details_for(file)
+        if file.folder?
+          folders_count = file.list.select(&:folder?).count + 2
+          [
+            'drwxr-xr-x',
+            right_align_text(folders_count.to_s, 3),
+            @user, @user,
+            '    4096',
+            format_date(file.mtime.utc),
+            file.basename
+          ].join(' ')
+        else
+          [
+            '-rw-r--r--   1',
+            @user, @user,
+            right_align_text(file.size.to_s, 8),
+            format_date(file.mtime.utc),
+            file.basename
+          ].join(' ')
+        end
+      end
     
       def raise_if_closed
         raise IOError.new('closed stream') if closed?
+      end
+      
+      def right_align_text(content, spaces)
+        if content.length >= spaces
+          content
+        else
+          ' ' * (spaces - content.length) + content
+        end
       end
   end
 end

@@ -41,5 +41,13 @@ module MockFTP
     def basename
       ::File.basename(@path)
     end
+    
+    def file?
+      false
+    end
+    
+    def folder?
+      true
+    end
   end
 end

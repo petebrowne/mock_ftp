@@ -68,7 +68,7 @@ module MockFTP
       full_path = follow_path(path)
       
       if file = find(full_path)
-        if file.respond_to?(:mtime)
+        if file.file?
           local ? file.mtime : file.mtime.utc
         else
           raise ::Net::FTPPermError.new("550 #{path}: not a plain file.")
@@ -114,7 +114,7 @@ module MockFTP
       full_path = follow_path(path)
       
       if file = find(full_path)
-        if file.respond_to?(:content)
+        if file.file?
           file.content.size
         else
           raise ::Net::FTPPermError.new("550 #{path}: not a regular file")

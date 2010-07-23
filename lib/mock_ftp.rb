@@ -2,8 +2,9 @@ require 'net/ftp'
 require 'mock_ftp/core_ext/string'
 
 module MockFTP
-  autoload :File,   'mock_ftp/file'
-  autoload :Folder, 'mock_ftp/folder'
+  autoload :File,     'mock_ftp/file'
+  autoload :Folder,   'mock_ftp/folder'
+  autoload :ListInfo, 'mock_ftp/list_info'
   
   module Net
     autoload :FTP, 'mock_ftp/net_ftp'

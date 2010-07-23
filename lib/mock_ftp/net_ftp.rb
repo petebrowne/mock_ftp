@@ -20,7 +20,7 @@ module MockFTP
     def initialize(host = nil, user = nil, passwd = nil, acct = nil)
       @current_path = ''
       @closed       = false
-      @host         = host
+      @host         = host || 'www.example.com'
       @user         = user || 'anonymous'
     end
     
@@ -32,12 +32,10 @@ module MockFTP
     def chdir(path)
       raise_if_closed
       full_path = follow_path(path)
+      file = MockFTP::Folder.find(full_path)
+      raise_ftp_error("550 #{path}: No such file or directory") if file.nil?
       
-      if folder = find(full_path)
-        @current_path = full_path
-      else
-        raise ::Net::FTPPermError.new("550 #{path}: No such file or directory")
-      end
+      @current_path = full_path
     end
     
     def close
@@ -55,18 +53,14 @@ module MockFTP
     
     def list(path = '')
       raise_if_closed
-      full_path = follow_path(path)
+      file = find(path, "450 #{path}: No such file or directory")
       
-      if file = find(full_path)
-        if file.folder?
-          file.list.collect do |f|
-            list_details_for(f)
-          end
-        else
-          [ list_details_for(file) ]
+      if file.folder?
+        file.list.collect do |f|
+          MockFTP::ListInfo.new(f, @user).to_s
         end
       else
-        raise ::Net::FTPPermError.new("450 #{path}: No such file or directory")
+        [ MockFTP::ListInfo.new(file, @user).to_s ]
       end
     end
     alias_method :ls, :list
@@ -84,29 +78,18 @@ module MockFTP
     
     def mtime(path, local = false)
       raise_if_closed
-      full_path = follow_path(path)
+      file = find(path)
+      raise_ftp_error("550 #{path}: not a plain file.") unless file.file?
       
-      if file = find(full_path)
-        if file.file?
-          local ? file.mtime : file.mtime.utc
-        else
-          raise ::Net::FTPPermError.new("550 #{path}: not a plain file.")
-        end
-      else
-        raise ::Net::FTPPermError.new("550 #{path}: No such file or directory")
-      end
+      local ? file.mtime : file.mtime.utc
     end
     
     def nlst(path = '')
       raise_if_closed
-      full_path = follow_path(path)
+      folder = find(path, '550 Directory not found')
       
-      if folder = find(full_path)
-        folder.list.collect do |f|
-          path.empty? ? f.basename : (path / f.basename)
-        end
-      else
-        raise ::Net::FTPPermError.new('550 Directory not found')
+      folder.list.collect do |f|
+        path.empty? ? f.basename : (path / f.basename)
       end
     end
     
@@ -130,23 +113,20 @@ module MockFTP
     
     def size(path)
       raise_if_closed
-      full_path = follow_path(path)
+      file = find(path)
+      raise_ftp_error("550 #{path}: not a regular file") unless file.file?
       
-      if file = find(full_path)
-        if file.file?
-          file.content.size
-        else
-          raise ::Net::FTPPermError.new("550 #{path}: not a regular file")
-        end
-      else
-        raise ::Net::FTPPermError.new("550 #{path}: No such file or directory")
-      end
+      file.size
     end
     
     protected
     
-      def find(path)
-        MockFTP::Folder.find(path)
+      def find(path, error_message = "550 #{path}: No such file or directory")
+        if file = MockFTP::Folder.find(follow_path(path))
+          file
+        else
+          raise_ftp_error(error_message)
+        end
       end
     
       def follow_path(path)
@@ -162,49 +142,12 @@ module MockFTP
         end
       end
       
-      def format_date(date)
-        formatted_date  = [ date.strftime('%b') ]
-        formatted_date << right_align_text(date.day.to_s, 2)
-        formatted_date << if date.year == Time.now.year
-          date.strftime('%H:%M').gsub(/^0/, ' ')
-        else
-          " #{date.year}"
-        end
-        formatted_date.join(' ')
-      end
-      
-      def list_details_for(file)
-        if file.folder?
-          folders_count = file.list.select(&:folder?).count + 2
-          [
-            'drwxr-xr-x',
-            right_align_text(folders_count.to_s, 3),
-            @user, @user,
-            '    4096',
-            format_date(file.mtime.utc),
-            file.basename
-          ].join(' ')
-        else
-          [
-            '-rw-r--r--   1',
-            @user, @user,
-            right_align_text(file.size.to_s, 8),
-            format_date(file.mtime.utc),
-            file.basename
-          ].join(' ')
-        end
+      def raise_ftp_error(error_message)
+        raise ::Net::FTPPermError.new(error_message)
       end
     
       def raise_if_closed
         raise IOError.new('closed stream') if closed?
-      end
-      
-      def right_align_text(content, spaces)
-        if content.length >= spaces
-          content
-        else
-          ' ' * (spaces - content.length) + content
-        end
       end
   end
 end

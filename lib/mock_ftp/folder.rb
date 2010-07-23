@@ -2,8 +2,11 @@ module MockFTP
   class Folder
     class << self
       def root(root_path, &block)
-        @structure = nil
-        self.new(root_path, &block)
+        begin
+          new(root_path, &block)
+        ensure
+          @structure = nil
+        end
       end
       
       def structure

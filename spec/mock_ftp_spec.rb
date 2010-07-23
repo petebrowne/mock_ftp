@@ -167,6 +167,26 @@ describe MockFTP do
       end
     end
     
+    context 'given a block' do
+      it "should correctly iterate through each file's info" do
+        list = []
+        mock_ftp do |f|
+          f.folder 'folder1', Time.utc(2005, 12, 25)
+          f.folder 'folder2', Time.utc(2005, 12, 25)
+          f.folder 'folder3', Time.utc(2005, 12, 25)
+          
+          open_ftp do |ftp|
+            ftp.list { |info| list << info }
+            list.should =~ [
+              'drwxr-xr-x   2 anonymous anonymous     4096 Dec 25  2005 folder1',
+              'drwxr-xr-x   2 anonymous anonymous     4096 Dec 25  2005 folder2',
+              'drwxr-xr-x   2 anonymous anonymous     4096 Dec 25  2005 folder3'
+            ]
+          end
+        end
+      end
+    end
+    
     context 'on a file' do
       it 'list the details of that file' do
         mock_ftp do |f|

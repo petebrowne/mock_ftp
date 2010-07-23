@@ -54,13 +54,12 @@ module MockFTP
     def list(path = '')
       raise_if_closed
       file = find(path, "450 #{path}: No such file or directory")
+      list = file.folder? ? file.list : [ file ]
       
-      if file.folder?
-        file.list.collect do |f|
-          MockFTP::ListInfo.new(f, @user).to_s
-        end
-      else
-        [ MockFTP::ListInfo.new(file, @user).to_s ]
+      list.collect do |f|
+        info = MockFTP::ListInfo.new(f, @user).to_s
+        yield info if block_given?
+        info
       end
     end
     alias_method :ls, :list

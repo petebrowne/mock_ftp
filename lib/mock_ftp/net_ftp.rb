@@ -95,6 +95,21 @@ module MockFTP
       raise_if_closed
     end
     
+    def size(path)
+      raise_if_closed
+      full_path = follow_path(path)
+      
+      if file = find(full_path)
+        if file.respond_to?(:content)
+          file.content.size
+        else
+          raise ::Net::FTPPermError.new("550 #{path}: not a regular file")
+        end
+      else
+        raise ::Net::FTPPermError.new("550 #{path}: No such file or directory")
+      end
+    end
+    
     protected
     
       def find(path)

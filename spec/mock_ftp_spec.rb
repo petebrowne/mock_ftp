@@ -413,4 +413,55 @@ describe MockFTP do
       end
     end
   end
+  
+  describe '#size' do
+    it 'should return the size of a given file' do
+      mock_ftp do |f|
+        f.file 'file', 'Hello'
+        
+        open_ftp do |ftp|
+          ftp.size('file').should == 5
+        end
+      end
+    end
+    
+    context 'on a folder' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          f.folder 'folder'
+        
+          open_ftp do |ftp|
+            expect {
+              ftp.size('folder')
+            }.to raise_error(Net::FTPPermError, '550 folder: not a regular file')
+          end
+        end
+      end
+    end
+    
+    context 'without a file' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            expect {
+              ftp.size('blah')
+            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.size('blah')
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
 end

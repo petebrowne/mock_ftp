@@ -115,6 +115,87 @@ describe MockFTP do
     end
   end
   
+  describe '#gettextfile' do
+    it 'should download the file locally' do
+      mock_ftp do |f|
+        f.file 'file', 'Hello'
+        
+        open_ftp(true) do |ftp|
+          ftp.gettextfile 'file'
+          ::File.read('file').should == 'Hello'
+        end
+      end
+    end
+    
+    context 'with a given local path' do
+      it 'should download to that location' do
+        mock_ftp do |f|
+          f.file 'file', 'Hello'
+          
+          open_ftp(true) do |ftp|
+            ftp.gettextfile 'file', 'local'
+            ::File.exist?('local').should be_true
+          end
+        end
+      end
+    end
+    
+    context 'given a block' do
+      it 'should yield the lines of the file' do
+        mock_ftp do |f|
+          f.file 'file', "1 \n2 \n3\n"
+          
+          open_ftp(true) do |ftp|
+            lines = ''
+            ftp.gettextfile 'file' do |line|
+              lines << line
+            end
+            lines.should == "1 2 3"
+          end
+        end
+      end
+    end
+    
+    context 'on a folder' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          f.folder 'folder'
+        
+          open_ftp do |ftp|
+            expect {
+              ftp.gettextfile 'folder'
+            }.to raise_error(Net::FTPPermError, '550 folder: not a regular file')
+          end
+        end
+      end
+    end
+    
+    context 'without a file' do
+      it 'should raise an error' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            expect {
+              ftp.gettextfile 'blah'
+            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+          end
+        end
+      end
+    end
+      
+    context 'when the connection is closed' do
+      it 'should raise an IOError' do
+        mock_ftp do |f|
+          open_ftp do |ftp|
+            ftp.close
+            expect {
+              ftp.gettextfile 'blah'
+            }.to raise_error(IOError, 'closed stream')
+          end
+        end
+      end
+    end
+  end
+  
   describe '#login' do
     it 'should return a successful login message' do
       mock_ftp do |f|
@@ -204,7 +285,7 @@ describe MockFTP do
         mock_ftp do |f|
           open_ftp do |ftp|
             expect {
-              ftp.list('blah')
+              ftp.list 'blah'
             }.to raise_error(Net::FTPPermError, '450 blah: No such file or directory')
           end
         end
@@ -217,7 +298,7 @@ describe MockFTP do
           open_ftp do |ftp|
             ftp.close
             expect {
-              ftp.list('blah')
+              ftp.list 'blah'
             }.to raise_error(IOError, 'closed stream')
           end
         end
@@ -245,7 +326,7 @@ describe MockFTP do
         
           open_ftp do |ftp|
             expect {
-              ftp.mdtm('folder')
+              ftp.mdtm 'folder'
             }.to raise_error(Net::FTPPermError, '550 folder: not a plain file.')
           end
         end
@@ -257,7 +338,7 @@ describe MockFTP do
         mock_ftp do |f|
           open_ftp do |ftp|
             expect {
-              ftp.mdtm('blah')
+              ftp.mdtm 'blah'
             }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
@@ -270,7 +351,7 @@ describe MockFTP do
           open_ftp do |ftp|
             ftp.close
             expect {
-              ftp.mdtm('blah')
+              ftp.mdtm 'blah'
             }.to raise_error(IOError, 'closed stream')
           end
         end
@@ -333,7 +414,7 @@ describe MockFTP do
         
           open_ftp do |ftp|
             expect {
-              ftp.mtime('folder')
+              ftp.mtime 'folder'
             }.to raise_error(Net::FTPPermError, '550 folder: not a plain file.')
           end
         end
@@ -345,7 +426,7 @@ describe MockFTP do
         mock_ftp do |f|
           open_ftp do |ftp|
             expect {
-              ftp.mtime('blah')
+              ftp.mtime 'blah'
             }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
@@ -358,7 +439,7 @@ describe MockFTP do
           open_ftp do |ftp|
             ftp.close
             expect {
-              ftp.mtime('blah')
+              ftp.mtime 'blah'
             }.to raise_error(IOError, 'closed stream')
           end
         end
@@ -519,7 +600,7 @@ describe MockFTP do
         
           open_ftp do |ftp|
             expect {
-              ftp.size('folder')
+              ftp.size 'folder'
             }.to raise_error(Net::FTPPermError, '550 folder: not a regular file')
           end
         end
@@ -531,7 +612,7 @@ describe MockFTP do
         mock_ftp do |f|
           open_ftp do |ftp|
             expect {
-              ftp.size('blah')
+              ftp.size 'blah'
             }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
@@ -544,7 +625,7 @@ describe MockFTP do
           open_ftp do |ftp|
             ftp.close
             expect {
-              ftp.size('blah')
+              ftp.size 'blah'
             }.to raise_error(IOError, 'closed stream')
           end
         end

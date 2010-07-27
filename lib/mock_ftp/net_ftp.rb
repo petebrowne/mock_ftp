@@ -2,6 +2,10 @@ require 'pathname'
 
 module MockFTP
   class Net::FTP
+    FTP_PORT = 21
+    CRLF = "\r\n"
+    DEFAULT_BLOCKSIZE = 4096
+    
     class << self
       def open(host, user = nil, passwd = nil, acct = nil)
         if block_given?
@@ -18,6 +22,7 @@ module MockFTP
     end
     
     def initialize(host = nil, user = nil, passwd = nil, acct = nil)
+      @binary       = true
       @current_path = ''
       @closed       = false
       @host         = host || 'www.example.com'
@@ -46,9 +51,22 @@ module MockFTP
       !!@closed
     end
     
-    def connect(host, port = nil)
+    def connect(host, port = FTP_PORT)
       @host = host
       nil
+    end
+    
+    def gettextfile(path, local = ::File.basename(path), &block)
+      raise_if_closed
+      file = find(path)
+      raise_ftp_error("550 #{path}: not a regular file") unless file.file?
+      
+      ::File.open(local, 'w') do |f|
+        file.content.each do |l|
+          f << l
+          yield l.chomp if block_given?
+        end
+      end
     end
     
     def list(path = '')

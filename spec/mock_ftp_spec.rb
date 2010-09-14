@@ -62,7 +62,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.chdir 'blah'
-            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+            }.to raise_error(::Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
       end
@@ -164,7 +164,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.gettextfile 'folder'
-            }.to raise_error(Net::FTPPermError, '550 folder: not a regular file')
+            }.to raise_error(::Net::FTPPermError, '550 folder: not a regular file')
           end
         end
       end
@@ -176,7 +176,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.gettextfile 'blah'
-            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+            }.to raise_error(::Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
       end
@@ -286,7 +286,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.list 'blah'
-            }.to raise_error(Net::FTPPermError, '450 blah: No such file or directory')
+            }.to raise_error(::Net::FTPPermError, '450 blah: No such file or directory')
           end
         end
       end
@@ -327,7 +327,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.mdtm 'folder'
-            }.to raise_error(Net::FTPPermError, '550 folder: not a plain file.')
+            }.to raise_error(::Net::FTPPermError, '550 folder: not a plain file.')
           end
         end
       end
@@ -339,7 +339,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.mdtm 'blah'
-            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+            }.to raise_error(::Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
       end
@@ -415,7 +415,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.mtime 'folder'
-            }.to raise_error(Net::FTPPermError, '550 folder: not a plain file.')
+            }.to raise_error(::Net::FTPPermError, '550 folder: not a plain file.')
           end
         end
       end
@@ -427,7 +427,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.mtime 'blah'
-            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+            }.to raise_error(::Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
       end
@@ -480,7 +480,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.nlst 'blah'
-            }.to raise_error(Net::FTPPermError, '550 Directory not found')
+            }.to raise_error(::Net::FTPPermError, '550 Directory not found')
           end
         end
       end
@@ -601,7 +601,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.size 'folder'
-            }.to raise_error(Net::FTPPermError, '550 folder: not a regular file')
+            }.to raise_error(::Net::FTPPermError, '550 folder: not a regular file')
           end
         end
       end
@@ -613,7 +613,7 @@ describe MockFTP do
           open_ftp do |ftp|
             expect {
               ftp.size 'blah'
-            }.to raise_error(Net::FTPPermError, '550 blah: No such file or directory')
+            }.to raise_error(::Net::FTPPermError, '550 blah: No such file or directory')
           end
         end
       end

@@ -1,27 +1,30 @@
---- 
-dependencies: 
-  timecop: 
-    group: 
-    - :development
-    version: ~> 0.3.0
-  rspec: 
-    group: 
-    - :development
-    version: ">= 2.0.0.beta.17"
-specs: 
-- diff-lcs: 
-    version: 1.1.2
-- rspec-core: 
-    version: 2.0.0.beta.17
-- rspec-expectations: 
-    version: 2.0.0.beta.17
-- rspec-mocks: 
-    version: 2.0.0.beta.17
-- rspec: 
-    version: 2.0.0.beta.17
-- timecop: 
-    version: 0.3.5
-hash: 7a816c31ddbda5bc9af33570ccfb32965bb15115
-sources: 
-- Rubygems: 
-    uri: http://rubygems.org
+PATH
+  remote: .
+  specs:
+    mock_ftp (0.1)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    diff-lcs (1.1.2)
+    rspec (2.0.0.beta.22)
+      rspec-core (= 2.0.0.beta.22)
+      rspec-expectations (= 2.0.0.beta.22)
+      rspec-mocks (= 2.0.0.beta.22)
+    rspec-core (2.0.0.beta.22)
+    rspec-expectations (2.0.0.beta.22)
+      diff-lcs (>= 1.1.2)
+    rspec-mocks (2.0.0.beta.22)
+      rspec-core (= 2.0.0.beta.22)
+      rspec-expectations (= 2.0.0.beta.22)
+    timecop (0.3.5)
+    yard (0.6.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mock_ftp!
+  rspec (~> 2.0.0.beta.22)
+  timecop (~> 0.3.0)
+  yard (~> 0.6.0)

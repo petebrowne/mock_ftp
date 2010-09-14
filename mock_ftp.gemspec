@@ -1,5 +1,3 @@
-require 'bundler'
-
 Gem::Specification.new do |s|
   s.name        = 'mock_ftp'
   s.version     = '0.1'
@@ -13,5 +11,6 @@ Gem::Specification.new do |s|
   
   s.files = Dir['lib/**/*'] + %w(LICENSE README.md)
   
-  s.add_bundler_dependencies
+  s.add_development_dependency 'rspec',   '~> 2.0.0.beta.22'
+  s.add_development_dependency 'timecop', '~> 0.3.0'
 end
